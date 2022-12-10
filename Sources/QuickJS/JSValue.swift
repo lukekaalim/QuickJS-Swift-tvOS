@@ -79,6 +79,11 @@ public class JSObject: ConvertibleWithJavascript {
         self.context = context;
     }
     
+    public init(_ context: JSContext) {
+        self.context = context.core;
+        self.object = JS_NewObject(context.core.context);
+    }
+    
     public func getProperty(propertyName: String) {
         JS_GetPropertyStr(context.context, object, propertyName);
     }
