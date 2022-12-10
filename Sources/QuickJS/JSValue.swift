@@ -71,6 +71,22 @@ public class JSValue {
     }
 }
 
+public class JSObject: ConvertibleWithJavascript {
+    var object: JSCValue;
+    var context: JSContextWrapper;
+    public required init?(_ context: JSContextWrapper, value: JSCValue) {
+        self.object = value;
+        self.context = context;
+    }
+    
+    public func getProperty(propertyName: String) {
+        JS_GetPropertyStr(context.context, object, propertyName);
+    }
+    public func setProperty(propertyName: String, value: JSValue) {
+        JS_SetPropertyStr(context.context, object, propertyName, value.cValue);
+    }
+}
+
 extension JSValue {
     static var undefined: JSValue {
         return JSValue(nil, value: .undefined)
