@@ -43,6 +43,11 @@ public class JSContext {
         let value = JS_Eval(core.context, jsCode, jsCode.lengthOfBytes(using: .utf8), "<Swift>", type.rawValue)
         return JSValue(core, value: value)
     }
+    @discardableResult
+    public func evalModule(_ jsCode: String, moduleName: String) -> JSValue {
+        let value = JS_Eval(core.context, jsCode, jsCode.lengthOfBytes(using: .utf8), moduleName, EvalType.module.rawValue)
+        return JSValue(core, value: value)
+    }
     
     @discardableResult
     public func call(function: JSValue, argc: Int, argv: JSCValuePointer?) -> JSValue {
