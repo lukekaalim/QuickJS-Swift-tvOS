@@ -156,6 +156,13 @@ public class JSContext {
         
         return "\(description!)\n\(stackStr!)"
     }
+    
+    public func createString(value: String) -> JSValue {
+        return value.jsValue(core);
+    }
+    public func createObject(value: String) -> JSObject {
+        return JSObject(self);
+    }
         
     // Runloop
     public func enableRunloop() {
