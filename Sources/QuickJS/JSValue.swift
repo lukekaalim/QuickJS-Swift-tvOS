@@ -136,7 +136,7 @@ public extension JSValue {
     
     var object: JSObjectValue? {
         guard self.context != nil else { return nil }
-        return JSObjectValue(context, value: cValue);
+        return JS_IsObject(cValue) == 0 ? JSObjectValue(context, value: cValue) : nil;
     }
     
     var error: JSError? {
