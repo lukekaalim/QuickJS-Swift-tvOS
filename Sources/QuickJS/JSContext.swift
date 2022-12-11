@@ -164,8 +164,12 @@ public class JSContext {
     public func createString(value: String) -> JSValue {
         return value.jsValue(core);
     }
+    
+    public var swiftObjects: Array<JSObjectValue> = [];
     public func createObject() -> JSObjectValue {
-        return JSObjectValue(self);
+        let object = JSObjectValue(self);
+        swiftObjects.append(object);
+        return object;
     }
     
     public func createFunction(name: String, argumentCount: Int32, implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?) -> JSFunction {
