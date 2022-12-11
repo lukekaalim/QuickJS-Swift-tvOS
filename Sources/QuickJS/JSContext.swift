@@ -176,7 +176,8 @@ public class JSContext {
         var jscArguments = arguments.map { value in
             value.cValue
         };
-        JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        var returnValue = JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        return JSValue(self.core, value: returnValue);
     }
     
         
