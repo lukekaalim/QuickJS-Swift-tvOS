@@ -65,6 +65,13 @@ public class JSValue {
         return nil
     }
     
+    public func dup() {
+        context?.dup(self.cValue)
+    }
+    public func free() {
+        context?.free(self.cValue)
+    }
+    
     deinit {
         if autoFree {
             context?.free(cValue)
