@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 import Foundation
+import os;
 import QuickJSC
 
 public typealias JSModuleInitFunction = @convention(c) (OpaquePointer?, OpaquePointer?) -> CInt
@@ -94,5 +95,11 @@ public class JSFunction : JSValue {
             return result.jsValue(context.core).cValue
         }
         return .undefined
+    }
+    
+    deinit {
+        if #available(tvOS 14, *) {
+            Logger().info("DEINIT FUNCTION \(self.name)")
+        }
     }
 }

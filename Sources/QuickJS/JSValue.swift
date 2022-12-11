@@ -22,6 +22,7 @@
 
 import Foundation
 import QuickJSC
+import os
 
 public typealias JSCValue = QuickJSC.JSValue
 public typealias JSCValuePointer = UnsafeMutablePointer<JSCValue>
@@ -93,6 +94,12 @@ public class JSObjectValue: JSValue {
     public func setProperty(_ propertyName: String, _ value: JSValue) throws {
         guard self.context != nil else { throw JSObjectError.noContext }
         JS_SetPropertyStr(context?.context, cValue, propertyName, value.cValue);
+    }
+    
+    deinit {
+        if #available(tvOS 14, *) {
+            Logger().info("DEINIT Object")
+        }
     }
 }
 
