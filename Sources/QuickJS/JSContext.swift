@@ -168,7 +168,14 @@ public class JSContext {
         return JSObjectValue(self);
     }
     
-    public func createFunction(name: String, argumentCount: Int32, block: @escaping JSFunction.Block) -> JSFunction {
+    public func createFunction(name: String, argumentCount: Int32, implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?) -> JSFunction {
+        let block: JSFunction.Block = { context, this, argc, argv in
+            let buffer = UnsafeBufferPointer(start: argv, count: argc);
+            let arguments = Array<JSCValue>(buffer).map { cValue in
+                JSValue(self.core, value: cValue);
+            };
+            return implementation(this, arguments)
+        }
         return JSFunction(self.core, name: name, argc: argumentCount, block: block);
     }
     
