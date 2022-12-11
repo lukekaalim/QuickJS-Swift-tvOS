@@ -182,7 +182,7 @@ public extension JSValue {
     
     var object: JSObjectValue? {
         guard self.context != nil else { return nil }
-        return JS_IsObject(cValue) == 0 ? JSObjectValue(context, value: cValue, autoFree: self.autoFree) : nil;
+        return JS_IsObject(cValue) == 1 ? JSObjectValue(context, value: cValue, autoFree: self.autoFree) : nil;
     }
     
     var array: JSArrayValue? {
