@@ -94,13 +94,13 @@ public class JSObjectValue: JSValue {
         self.init(context.core, value: value, dup: true, autoFree: true);
     }
     
-    public func getProperty(_ propertyName: String) throws -> JSValue {
-        guard self.context != nil else { throw JSObjectError.noContext }
+    public func getProperty(_ propertyName: String) -> JSValue {
+        guard self.context != nil else { return .undefined }
         let value = JS_GetPropertyStr(context?.context, cValue, propertyName);
         return JSValue(context, value: value);
     }
-    public func setProperty(_ propertyName: String, _ value: JSValue) throws {
-        guard self.context != nil else { throw JSObjectError.noContext }
+    public func setProperty(_ propertyName: String, _ value: JSValue) {
+        guard self.context != nil else { return }
         self.swiftProperties[propertyName] = value;
         JS_SetPropertyStr(context?.context, cValue, propertyName, value.cValue);
     }
