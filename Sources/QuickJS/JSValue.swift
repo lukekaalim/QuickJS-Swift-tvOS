@@ -112,6 +112,26 @@ public class JSObjectValue: JSValue {
     }
 }
 
+public class JSArrayValue: JSObjectValue {
+    public var swiftIndicies: Dictionary<Int, JSValue> = Dictionary();
+    
+    public var length: Int {
+        return getProperty("length").int!
+    }
+    
+    public func getIndex(_ index: Int) -> JSValue {
+        guard self.context != nil else { return .undefined }
+        let value = JS_GetPropertyUint32(context?.context, cValue, UInt32(index));
+        return JSValue(context, value: value);
+    }
+    public func setIndex(_ index: Int, _ value: JSValue) {
+        guard self.context != nil else { return }
+        self.swiftIndicies[index] = value;
+        JS_SetPropertyUint32(context?.context, cValue, UInt32(index), value.cValue);
+    }
+    
+}
+
 extension JSValue {
     static var undefined: JSValue {
         return JSValue(nil, value: .undefined)
@@ -152,7 +172,12 @@ public extension JSValue {
     
     var object: JSObjectValue? {
         guard self.context != nil else { return nil }
-        return JS_IsObject(cValue) == 0 ? JSObjectValue(context, value: cValue) : nil;
+        return JS_IsObject(cValue) == 0 ? JSObjectValue(context, value: cValue, autoFree: self.autoFree) : nil;
+    }
+    
+    var array: JSArrayValue? {
+        guard self.context != nil else { return nil }
+        return JS_IsArray(self.context!.context, cValue) == 0 ? JSArrayValue(context, value: cValue, autoFree: self.autoFree) : nil;
     }
     
     var bool: Bool? {
