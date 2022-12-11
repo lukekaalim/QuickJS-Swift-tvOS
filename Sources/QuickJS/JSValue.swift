@@ -72,6 +72,16 @@ public class JSValue {
         context?.free(self.cValue)
     }
     
+    public func printJSON() -> String {
+        let cValue: JSCValue = JS_JSONStringify(
+            self.context?.context,
+            self.cValue,
+            .null,
+            JS_NewInt32(self.context?.context, Int32(2))
+        );
+        return JSValue(self.context, value: cValue, dup: false, autoFree: false).string!;
+    }
+    
     deinit {
         if autoFree {
             context?.free(cValue)
