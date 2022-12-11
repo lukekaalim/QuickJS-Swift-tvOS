@@ -339,7 +339,7 @@ extension Bool: ConvertibleWithJavascript {
             return nil
         }
         
-        self = JS_ToBool(context.context, value) < 0
+        self = JS_ToBool(context.context, value) == 1
     }
     
     public func jsValue(_ context: JSContextWrapper) -> JSValue {
