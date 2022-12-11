@@ -134,6 +134,11 @@ public extension JSValue {
         return self.getValue()
     }
     
+    var object: JSObjectValue? {
+        guard self.context != nil else { return nil }
+        return JSObjectValue(context, value: cValue);
+    }
+    
     var error: JSError? {
         guard self.context != nil else { return nil }
         return self.getValue()
