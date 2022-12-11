@@ -107,7 +107,7 @@ public class JSObjectValue: JSValue {
     public func getProperty(_ propertyName: String) -> JSValue {
         guard self.context != nil else { return .undefined }
         let value = JS_GetPropertyStr(context?.context, cValue, propertyName);
-        return JSValue(context, value: value);
+        return JSValue(context, value: value, autoFree: false);
     }
     public func setProperty(_ propertyName: String, _ value: JSValue) {
         guard self.context != nil else { return }
@@ -132,7 +132,7 @@ public class JSArrayValue: JSObjectValue {
     public func getIndex(_ index: Int) -> JSValue {
         guard self.context != nil else { return .undefined }
         let value = JS_GetPropertyUint32(context?.context, cValue, UInt32(index));
-        return JSValue(context, value: value);
+        return JSValue(context, value: value, autoFree: false);
     }
     public func setIndex(_ index: Int, _ value: JSValue) {
         guard self.context != nil else { return }
