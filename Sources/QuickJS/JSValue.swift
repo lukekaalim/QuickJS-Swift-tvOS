@@ -76,6 +76,7 @@ public class JSObjectValue: JSValue {
     enum JSObjectError: Error {
         case noContext
     }
+    public var swiftProperties: Dictionary<String, JSValue> = Dictionary();
 
     required init(_ context: JSContextWrapper?, value: JSCValue, dup: Bool = false, autoFree: Bool = true) {
         super.init(context, value: value, dup: dup, autoFree: autoFree);
@@ -93,6 +94,7 @@ public class JSObjectValue: JSValue {
     }
     public func setProperty(_ propertyName: String, _ value: JSValue) throws {
         guard self.context != nil else { throw JSObjectError.noContext }
+        self.swiftProperties[propertyName] = value;
         JS_SetPropertyStr(context?.context, cValue, propertyName, value.cValue);
     }
     
