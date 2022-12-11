@@ -171,11 +171,14 @@ public class JSContext {
     public func createFunction(name: String, argumentCount: Int32, block: @escaping JSFunction.Block) -> JSFunction {
         return JSFunction(self.core, name: name, argc: argumentCount, block: block);
     }
-    /*
-    public func callFunction(function: JSFunction) -> JSValue {
-        JS_Call(core.context, JSFunction., <#T##this_obj: JSValue##JSValue#>, <#T##argc: Int32##Int32#>, <#T##argv: UnsafeMutablePointer<JSValue>!##UnsafeMutablePointer<JSValue>!#>)
+    
+    public func callFunction(function: JSValue, thisObject: JSValue? = nil, arguments: [JSValue]) -> JSValue {
+        var jscArguments = arguments.map { value in
+            value.cValue
+        };
+        JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
     }
-     */
+    
         
     // Runloop
     public func enableRunloop() {
