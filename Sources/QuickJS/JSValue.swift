@@ -155,6 +155,12 @@ public extension JSValue {
         return JS_IsObject(cValue) == 0 ? JSObjectValue(context, value: cValue) : nil;
     }
     
+    var bool: Bool? {
+        guard self.context != nil else { return nil }
+        return self.getValue()
+    }
+    
+    
     var error: JSError? {
         guard self.context != nil else { return nil }
         return self.getValue()
@@ -288,6 +294,21 @@ extension Double: ConvertibleWithJavascript {
     
     public func jsValue(_ context: JSContextWrapper) -> JSValue {
         let value = JS_NewFloat64(context.context, self)
+        return JSValue(context, value: value)
+    }
+}
+
+extension Bool: ConvertibleWithJavascript {
+    public init?(_ context: JSContextWrapper, value: JSCValue) {
+        if JS_IsBool(value) == 0 {
+            return nil
+        }
+        
+        self = JS_ToBool(context.context, value) < 0
+    }
+    
+    public func jsValue(_ context: JSContextWrapper) -> JSValue {
+        let value = JS_NewBool(context.context, self ? 1 : 0)
         return JSValue(context, value: value)
     }
 }
