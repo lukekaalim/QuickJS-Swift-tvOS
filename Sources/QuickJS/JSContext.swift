@@ -164,7 +164,7 @@ public class JSContext {
     public func createString(value: String) -> JSValue {
         return value.jsValue(core);
     }
-    public func createObject(value: String) -> JSObjectValue {
+    public func createObject() -> JSObjectValue {
         return JSObjectValue(self);
     }
     /*
