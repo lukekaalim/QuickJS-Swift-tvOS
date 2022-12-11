@@ -84,8 +84,9 @@ public class JSObjectValue: ConvertibleWithJavascript {
         self.object = JS_NewObject(context.core.context);
     }
     
-    public func getProperty(_ propertyName: String) {
-        JS_GetPropertyStr(context.context, object, propertyName);
+    public func getProperty(_ propertyName: String) -> JSValue {
+        let value = JS_GetPropertyStr(context.context, object, propertyName);
+        return JSValue(context, value: value);
     }
     public func setProperty(_ propertyName: String, _ value: JSValue) {
         JS_SetPropertyStr(context.context, object, propertyName, value.cValue);
