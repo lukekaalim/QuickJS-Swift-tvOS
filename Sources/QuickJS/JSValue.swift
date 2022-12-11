@@ -187,7 +187,7 @@ public extension JSValue {
     
     var array: JSArrayValue? {
         guard self.context != nil else { return nil }
-        return JS_IsArray(self.context!.context, cValue) == 0 ? JSArrayValue(context, value: cValue, autoFree: self.autoFree) : nil;
+        return JS_IsArray(self.context!.context, cValue) == 1 ? JSArrayValue(context, value: cValue, autoFree: self.autoFree) : nil;
     }
     
     var bool: Bool? {
