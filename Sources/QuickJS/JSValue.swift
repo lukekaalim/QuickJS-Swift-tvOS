@@ -71,25 +71,28 @@ public class JSValue {
     }
 }
 
-public class JSObjectValue: ConvertibleWithJavascript {
-    var object: JSCValue;
-    var context: JSContextWrapper;
-    public required init(_ context: JSContextWrapper, value: JSCValue) {
-        self.object = value;
-        self.context = context;
+public class JSObjectValue: JSValue {
+    enum JSObjectError: Error {
+        case noContext
+    }
+
+    required init(_ context: JSContextWrapper?, value: JSCValue, dup: Bool = false, autoFree: Bool = true) {
+        super.init(context, value: value, dup: dup, autoFree: autoFree);
     }
     
-    public init(_ context: JSContext) {
-        self.context = context.core;
-        self.object = JS_NewObject(context.core.context);
+    public convenience init(_ context: JSContext) {
+        let value = JS_NewObject(context.core.context);
+        self.init(context.core, value: value, dup: false, autoFree: true);
     }
     
-    public func getProperty(_ propertyName: String) -> JSValue {
-        let value = JS_GetPropertyStr(context.context, object, propertyName);
+    public func getProperty(_ propertyName: String) throws -> JSValue {
+        guard self.context != nil else { throw JSObjectError.noContext }
+        let value = JS_GetPropertyStr(context?.context, cValue, propertyName);
         return JSValue(context, value: value);
     }
-    public func setProperty(_ propertyName: String, _ value: JSValue) {
-        JS_SetPropertyStr(context.context, object, propertyName, value.cValue);
+    public func setProperty(_ propertyName: String, _ value: JSValue) throws {
+        guard self.context != nil else { throw JSObjectError.noContext }
+        JS_SetPropertyStr(context?.context, cValue, propertyName, value.cValue);
     }
 }
 
