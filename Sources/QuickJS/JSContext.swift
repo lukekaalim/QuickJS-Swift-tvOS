@@ -70,6 +70,10 @@ public class JSContext {
         
         JS_FreeValue(core.context, globalObj)
     }
+    public func getGlobalObject() -> JSObjectValue {
+        let value = JS_GetGlobalObject(core.context);
+        return JSObjectValue(core, value: value)
+    }
     
     public func hasGlobalProperty(name: String) -> Bool {
         let globalObj = JS_GetGlobalObject(core.context)
@@ -160,9 +164,14 @@ public class JSContext {
     public func createString(value: String) -> JSValue {
         return value.jsValue(core);
     }
-    public func createObject(value: String) -> JSObject {
-        return JSObject(self);
+    public func createObject(value: String) -> JSObjectValue {
+        return JSObjectValue(self);
     }
+    /*
+    public func callFunction(function: JSFunction) -> JSValue {
+        JS_Call(core.context, JSFunction., <#T##this_obj: JSValue##JSValue#>, <#T##argc: Int32##Int32#>, <#T##argv: UnsafeMutablePointer<JSValue>!##UnsafeMutablePointer<JSValue>!#>)
+    }
+     */
         
     // Runloop
     public func enableRunloop() {

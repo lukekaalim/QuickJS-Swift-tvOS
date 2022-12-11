@@ -71,10 +71,10 @@ public class JSValue {
     }
 }
 
-public class JSObject: ConvertibleWithJavascript {
+public class JSObjectValue: ConvertibleWithJavascript {
     var object: JSCValue;
     var context: JSContextWrapper;
-    public required init?(_ context: JSContextWrapper, value: JSCValue) {
+    public required init(_ context: JSContextWrapper, value: JSCValue) {
         self.object = value;
         self.context = context;
     }
@@ -84,10 +84,10 @@ public class JSObject: ConvertibleWithJavascript {
         self.object = JS_NewObject(context.core.context);
     }
     
-    public func getProperty(propertyName: String) {
+    public func getProperty(_ propertyName: String) {
         JS_GetPropertyStr(context.context, object, propertyName);
     }
-    public func setProperty(propertyName: String, value: JSValue) {
+    public func setProperty(_ propertyName: String, _ value: JSValue) {
         JS_SetPropertyStr(context.context, object, propertyName, value.cValue);
     }
 }
