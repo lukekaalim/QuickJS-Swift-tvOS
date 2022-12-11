@@ -176,7 +176,7 @@ public class JSContext {
         let block: JSFunction.Block = { context, this, argc, argv in
             let buffer = UnsafeBufferPointer(start: argv, count: argc);
             let arguments = Array<JSCValue>(buffer).map { cValue in
-                JSValue(self.core, value: cValue);
+                JSValue(self.core, value: cValue, dup: false, autoFree: false);
             };
             return implementation(this, arguments)
         }
