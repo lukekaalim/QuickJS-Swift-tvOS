@@ -84,7 +84,7 @@ public class JSObjectValue: JSValue {
     
     public convenience init(_ context: JSContext) {
         let value = JS_NewObject(context.core.context);
-        self.init(context.core, value: value, dup: false, autoFree: true);
+        self.init(context.core, value: value, dup: true, autoFree: true);
     }
     
     public func getProperty(_ propertyName: String) throws -> JSValue {
