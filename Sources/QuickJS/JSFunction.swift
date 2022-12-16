@@ -96,10 +96,4 @@ public class JSFunction : JSValue {
         }
         return .undefined
     }
-    
-    deinit {
-        if #available(tvOS 14, *) {
-            Logger().info("DEINIT FUNCTION \(self.name)")
-        }
-    }
 }

@@ -114,12 +114,6 @@ public class JSObjectValue: JSValue {
         self.swiftProperties[propertyName] = value;
         JS_SetPropertyStr(context?.context, cValue, propertyName, value.cValue);
     }
-    
-    deinit {
-        if #available(tvOS 14, *) {
-            Logger().info("DEINIT Object")
-        }
-    }
 }
 
 public class JSArrayValue: JSObjectValue {
