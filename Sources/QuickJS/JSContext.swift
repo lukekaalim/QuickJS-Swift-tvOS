@@ -187,7 +187,14 @@ public class JSContext {
         var jscArguments = arguments.map { value in
             value.cValue
         };
-        var returnValue = JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        let returnValue = JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        return JSValue(self.core, value: returnValue);
+    }
+    public func callFunction(function: JSValue, thisObject: ConvertibleWithJavascript? = nil, arguments: [ConvertibleWithJavascript]) -> JSValue {
+        var jscArguments = arguments.map { value in
+            value.jsValue(self.core).cValue
+        };
+        let returnValue = JS_Call(core.context, function.cValue, thisObject?.jsValue(self.core).cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
         return JSValue(self.core, value: returnValue);
     }
     
