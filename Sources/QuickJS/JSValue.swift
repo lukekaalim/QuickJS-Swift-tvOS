@@ -123,6 +123,11 @@ public class JSArrayValue: JSObjectValue {
         return getProperty("length").int!
     }
     
+    public convenience init(_ context: JSContext) {
+        let value = JS_NewArray(context.core.context);
+        self.init(context.core, value: value, dup: true, autoFree: true);
+    }
+    
     public func getIndex(_ index: Int) -> JSValue {
         guard self.context != nil else { return .undefined }
         let value = JS_GetPropertyUint32(context?.context, cValue, UInt32(index));

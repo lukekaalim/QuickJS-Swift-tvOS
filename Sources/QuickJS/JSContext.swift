@@ -171,6 +171,11 @@ public class JSContext {
         swiftObjects.append(object);
         return object;
     }
+    public func createArray() -> JSArrayValue {
+        let array = JSArrayValue(self);
+        swiftObjects.append(array);
+        return array;
+    }
     
     public func createFunction(name: String, argumentCount: Int32, implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?) -> JSFunction {
         let block: JSFunction.Block = { context, this, argc, argv in
