@@ -188,11 +188,25 @@ public class JSContext {
         return JSFunction(self.core, name: name, argc: argumentCount, block: block);
     }
     
-    public func callFunction(function: JSValue, thisObject: JSValue? = nil, arguments: [JSValue]) -> JSValue {
+    public struct JSUnknownError: Error {
+        public let message: String;
+    }
+    
+    @discardableResult
+    public func callFunction(function: JSValue, thisObject: JSValue? = nil, arguments: [JSValue]) throws -> JSValue {
         var jscArguments = arguments.map { value in
             value.cValue
         };
         let returnValue = JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        if (JS_IsException(returnValue) == 1) {
+            let value = JSValue(self.core, value: JS_GetException(core.context), dup: false, autoFree: false);
+            if let exceptionObject = value.object {
+                let message = exceptionObject.getProperty("message").string!;
+                throw JSUnknownError(message: message);
+            }
+            let stringMessage = JSValue(self.core, value: JS_JSONStringify(core.context, value.cValue, .null, 2.jsValue(self.core).cValue)).string!;
+            throw JSUnknownError(message: stringMessage)
+        }
         return JSValue(self.core, value: returnValue);
     }
     
