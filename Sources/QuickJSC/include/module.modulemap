@@ -1,4 +1,4 @@
 module QuickJSC {
-    header "quickjs.h"
+    header "../mirror/quickjs.h"
     export *
 }

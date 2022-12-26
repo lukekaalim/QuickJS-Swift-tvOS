@@ -25,11 +25,21 @@ let package = Package(
             name: "QuickJSC",
             dependencies: [],
             path: "Sources/QuickJSC",
-            exclude: [
-                // The Standard Library is not supported, since it exposes some
-                // operating system level things that aren't applicable to tvOS
-                "./quickjs-libc.c"
-            ]),
+            sources: [
+                "include",
+                "mirror/cutils.h",
+                "mirror/cutils.c",
+                "mirror/libunicode.h",
+                "mirror/libunicode.c",
+                "mirror/libregexp.h",
+                "mirror/libregexp.c",
+                "mirror/quickjs.h",
+                "mirror/quickjs.c"
+            ], 
+            cSettings: [
+                .define("CONFIG_VERSION", to: "\"Custom Swift Build\"")
+            ]
+        ),
         .target(
             name: "QuickJS",
             dependencies: ["QuickJSC"]),
