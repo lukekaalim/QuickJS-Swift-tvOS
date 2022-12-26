@@ -19,8 +19,12 @@ public struct JSUnknown: JSInteroperable {
     
     public let internalValue: JSValue;
     
+    public init(_ internalValue: JSValue) {
+        self.internalValue = internalValue
+    }
+    
     public static func createFromJS(_ value: JSValue) -> JSUnknown {
-        return JSUnknown(internalValue: value);
+        return JSUnknown(value);
     }
     public func convertToJS(_ context: JSContext) -> JSValue {
         return internalValue;
