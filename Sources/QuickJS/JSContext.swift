@@ -176,79 +176,15 @@ public class JSContext {
         swiftObjects.append(array);
         return array;
     }
-    /*
-    public class JSFunctionImplementation {
-        let context: JSContext;
-        let name: String;
-        let argumentCount: Int32;
-        let implementation: (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?;
-        
-        init(
-            context: JSContext,
-            name: String,
-            argumentCount: Int32,
-            implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?
-        ) {
-            self.context = context;
-            self.name = name;
-            self.argumentCount = argumentCount;
-            self.implementation = implementation;
-        }
-        
-        func invoke(
-            context: Optional<OpaquePointer>,
-            thisVal: QuickJSC.JSValue,
-            argc: Int32,
-            argv: Optional<UnsafeMutablePointer<QuickJSC.JSValue>>
-        ) -> QuickJSC.JSValue {
-            let buffer = UnsafeBufferPointer(start: argv, count: Int(argc));
-            let arguments = Array<QuickJSC.JSValue>(buffer).map { cValue in
-                JSValue(self.context.core, value: cValue);
-            };
-            let thisValue = JSValue(self.context.core, value: thisVal);
-            //implementation(thisValue, arguments);
-            
-            return JSCValue(u: JSValueUnion(int32: 0), tag: Int64(JS_TAG_NULL))
-        }
-        public func createFunctionValue() {
-            let jsFunction: QuickJSC.JSValue = JS_NewCFunction(self.context.core.context, invoke, name, argumentCount);
-        }
-    }
-     */
     
-    public func createFunction(
-        name: String,
-        argumentCount: Int32,
-        implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?
-    ) -> JSFunction {
-        /*
-        func jscFunction(
-            context: Optional<OpaquePointer>,
-            thisVal: QuickJSC.JSValue,
-            argc: Int32,
-            argv: Optional<UnsafeMutablePointer<QuickJSC.JSValue>>
-        ) -> QuickJSC.JSValue {
-            let buffer = UnsafeBufferPointer(start: argv, count: Int(argc));
-            let arguments = Array<QuickJSC.JSValue>(buffer).map { cValue in
-                JSValue(self.core, value: cValue);
-            };
-            let thisValue = JSValue(self.core, value: thisVal);
-            //implementation(thisValue, arguments);
-            
-            return JSCValue(u: JSValueUnion(int32: 0), tag: Int64(JS_TAG_NULL))
-        }
-        
-        let jsFunction: QuickJSC.JSValue = JS_NewCFunction(self.core.context, jscFunction, name, argumentCount);
-        */
+    public func createFunction(name: String, argumentCount: Int32, implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?) -> JSFunction {
         let block: JSFunction.Block = { context, this, argc, argv in
             let buffer = UnsafeBufferPointer(start: argv, count: argc);
             let arguments = Array<JSCValue>(buffer).map { cValue in
                 JSValue(self.core, value: cValue, dup: false, autoFree: false);
             };
-            buffer.deallocate();
             return implementation(this, arguments)
         }
-        
         return JSFunction(self.core, name: name, argc: argumentCount, block: block);
     }
     
@@ -257,6 +193,13 @@ public class JSContext {
             value.cValue
         };
         let returnValue = JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        return JSValue(self.core, value: returnValue);
+    }
+    public func callFunction(function: JSValue, thisObject: ConvertibleWithJavascript? = nil, arguments: [ConvertibleWithJavascript]) -> JSValue {
+        var jscArguments = arguments.map { value in
+            value.jsValue(self.core).cValue
+        };
+        let returnValue = JS_Call(core.context, function.cValue, thisObject?.jsValue(self.core).cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
         return JSValue(self.core, value: returnValue);
     }
     
