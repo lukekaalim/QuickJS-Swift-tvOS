@@ -14,6 +14,19 @@ public protocol JSInteroperable {
     func convertToJS(_ context: JSContext) -> JSValue;
 }
 
+public struct JSUnknown: JSInteroperable {
+    public typealias JSType = JSUnknown;
+    
+    public let internalValue: JSValue;
+    
+    public static func createFromJS(_ value: JSValue) -> JSUnknown {
+        return JSUnknown(internalValue: value);
+    }
+    public func convertToJS(_ context: JSContext) -> JSValue {
+        return internalValue;
+    }
+}
+
 extension String: JSInteroperable {
     public static func createFromJS(_ value: JSValue) -> String {
         return value.string!;
