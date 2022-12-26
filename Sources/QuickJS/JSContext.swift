@@ -190,6 +190,9 @@ public class JSContext {
     
     public struct JSUnknownError: Error {
         public let message: String;
+        public let stack: String?;
+        
+        public let internalValue: JSValue;
     }
     
     @discardableResult
@@ -202,10 +205,11 @@ public class JSContext {
             let value = JSValue(self.core, value: JS_GetException(core.context), dup: false, autoFree: false);
             if let exceptionObject = value.object {
                 let message = exceptionObject.getProperty("message").string!;
-                throw JSUnknownError(message: message);
+                let stack = exceptionObject.getProperty("stack").string!;
+                throw JSUnknownError(message: message, stack: stack, internalValue: value);
             }
             let stringMessage = JSValue(self.core, value: JS_JSONStringify(core.context, value.cValue, .null, 2.jsValue(self.core).cValue)).string!;
-            throw JSUnknownError(message: stringMessage)
+            throw JSUnknownError(message: stringMessage, stack: nil, internalValue: value)
         }
         return JSValue(self.core, value: returnValue);
     }
