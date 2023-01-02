@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "QuickJS",
+    platforms: [
+        .tvOS(.v11),
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -21,7 +24,22 @@ let package = Package(
         .target(
             name: "QuickJSC",
             dependencies: [],
-            path: "Sources/QuickJSC"),
+            path: "Sources/QuickJSC",
+            sources: [
+                "include",
+                "mirror/cutils.h",
+                "mirror/cutils.c",
+                "mirror/libunicode.h",
+                "mirror/libunicode.c",
+                "mirror/libregexp.h",
+                "mirror/libregexp.c",
+                "mirror/quickjs.h",
+                "mirror/quickjs.c"
+            ], 
+            cSettings: [
+                .define("CONFIG_VERSION", to: "\"Custom Swift Build\"")
+            ]
+        ),
         .target(
             name: "QuickJS",
             dependencies: ["QuickJSC"]),

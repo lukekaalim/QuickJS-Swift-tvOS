@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 import Foundation
+import os;
 import QuickJSC
 
 public typealias JSModuleInitFunction = @convention(c) (OpaquePointer?, OpaquePointer?) -> CInt

@@ -43,6 +43,11 @@ public class JSContext {
         let value = JS_Eval(core.context, jsCode, jsCode.lengthOfBytes(using: .utf8), "<Swift>", type.rawValue)
         return JSValue(core, value: value)
     }
+    @discardableResult
+    public func evalModule(_ jsCode: String, moduleName: String) -> JSValue {
+        let value = JS_Eval(core.context, jsCode, jsCode.lengthOfBytes(using: .utf8), moduleName, EvalType.module.rawValue)
+        return JSValue(core, value: value)
+    }
     
     @discardableResult
     public func call(function: JSValue, argc: Int, argv: JSCValuePointer?) -> JSValue {
@@ -64,6 +69,10 @@ public class JSContext {
         JS_SetPropertyStr(core.context, globalObj, name.cString(using: .utf8), jsValue)
         
         JS_FreeValue(core.context, globalObj)
+    }
+    public func getGlobalObject() -> JSObjectValue {
+        let value = JS_GetGlobalObject(core.context);
+        return JSObjectValue(core, value: value)
     }
     
     public func hasGlobalProperty(name: String) -> Bool {
@@ -151,6 +160,60 @@ public class JSContext {
         
         return "\(description!)\n\(stackStr!)"
     }
+    
+    public func createString(value: String) -> JSValue {
+        return value.jsValue(core);
+    }
+    
+    public var swiftObjects: Array<JSObjectValue> = [];
+    public func createObject() -> JSObjectValue {
+        let object = JSObjectValue(self);
+        swiftObjects.append(object);
+        return object;
+    }
+    public func createArray() -> JSArrayValue {
+        let array = JSArrayValue(self);
+        swiftObjects.append(array);
+        return array;
+    }
+    
+    public func createFunction(name: String, argumentCount: Int32, implementation: @escaping (_ this: JSValue, _ arguments: [JSValue]) -> ConvertibleWithJavascript?) -> JSFunction {
+        let block: JSFunction.Block = { context, this, argc, argv in
+            let buffer = UnsafeBufferPointer(start: argv, count: argc);
+            let arguments = Array<JSCValue>(buffer).map { cValue in
+                JSValue(self.core, value: cValue, dup: false, autoFree: false);
+            };
+            return implementation(this, arguments)
+        }
+        return JSFunction(self.core, name: name, argc: argumentCount, block: block);
+    }
+    
+    public struct JSUnknownError: Error {
+        public let message: String;
+        public let stack: String?;
+        
+        public let internalValue: JSValue;
+    }
+    
+    @discardableResult
+    public func callFunction(function: JSValue, thisObject: JSValue? = nil, arguments: [JSValue]) throws -> JSValue {
+        var jscArguments = arguments.map { value in
+            value.cValue
+        };
+        let returnValue = JS_Call(core.context, function.cValue, thisObject?.cValue ?? .undefined, Int32(arguments.count), Optional(&jscArguments))
+        if (JS_IsException(returnValue) == 1) {
+            let value = JSValue(self.core, value: JS_GetException(core.context), dup: false, autoFree: false);
+            if let exceptionObject = value.object {
+                let message = exceptionObject.getProperty("message").string!;
+                let stack = exceptionObject.getProperty("stack").string!;
+                throw JSUnknownError(message: message, stack: stack, internalValue: value);
+            }
+            let stringMessage = JSValue(self.core, value: JS_JSONStringify(core.context, value.cValue, .null, 2.jsValue(self.core).cValue)).string!;
+            throw JSUnknownError(message: stringMessage, stack: nil, internalValue: value)
+        }
+        return JSValue(self.core, value: returnValue);
+    }
+    
         
     // Runloop
     public func enableRunloop() {

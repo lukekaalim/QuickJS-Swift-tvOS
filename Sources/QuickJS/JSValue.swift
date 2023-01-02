@@ -22,6 +22,7 @@
 
 import Foundation
 import QuickJSC
+import os
 
 public typealias JSCValue = QuickJSC.JSValue
 public typealias JSCValuePointer = UnsafeMutablePointer<JSCValue>
@@ -64,11 +65,80 @@ public class JSValue {
         return nil
     }
     
+    public func dup() {
+        context?.dup(self.cValue)
+    }
+    public func free() {
+        context?.free(self.cValue)
+    }
+    
+    public func printJSON() -> String {
+        let cValue: JSCValue = JS_JSONStringify(
+            self.context?.context,
+            self.cValue,
+            .null,
+            JS_NewInt32(self.context?.context, Int32(2))
+        );
+        return JSValue(self.context, value: cValue, dup: false, autoFree: false).string!;
+    }
+    
     deinit {
         if autoFree {
             context?.free(cValue)
         }
     }
+}
+
+public class JSObjectValue: JSValue {
+    enum JSObjectError: Error {
+        case noContext
+    }
+    public var swiftProperties: Dictionary<String, JSValue> = Dictionary();
+
+    required init(_ context: JSContextWrapper?, value: JSCValue, dup: Bool = false, autoFree: Bool = true) {
+        super.init(context, value: value, dup: dup, autoFree: autoFree);
+    }
+    
+    public convenience init(_ context: JSContext) {
+        let value = JS_NewObject(context.core.context);
+        self.init(context.core, value: value, dup: true, autoFree: true);
+    }
+    
+    public func getProperty(_ propertyName: String) -> JSValue {
+        guard self.context != nil else { return .undefined }
+        let value = JS_GetPropertyStr(context?.context, cValue, propertyName);
+        return JSValue(context, value: value, autoFree: false);
+    }
+    public func setProperty(_ propertyName: String, _ value: JSValue) {
+        guard self.context != nil else { return }
+        self.swiftProperties[propertyName] = value;
+        JS_SetPropertyStr(context?.context, cValue, propertyName, value.cValue);
+    }
+}
+
+public class JSArrayValue: JSObjectValue {
+    public var swiftIndicies: Dictionary<Int, JSValue> = Dictionary();
+    
+    public var length: Int {
+        return getProperty("length").int!
+    }
+    
+    public convenience init(_ context: JSContext) {
+        let value = JS_NewArray(context.core.context);
+        self.init(context.core, value: value, dup: true, autoFree: true);
+    }
+    
+    public func getIndex(_ index: Int) -> JSValue {
+        guard self.context != nil else { return .undefined }
+        let value = JS_GetPropertyUint32(context?.context, cValue, UInt32(index));
+        return JSValue(context, value: value, autoFree: false);
+    }
+    public func setIndex(_ index: Int, _ value: JSValue) {
+        guard self.context != nil else { return }
+        self.swiftIndicies[index] = value;
+        JS_SetPropertyUint32(context?.context, cValue, UInt32(index), value.cValue);
+    }
+    
 }
 
 extension JSValue {
@@ -80,7 +150,7 @@ extension JSValue {
     }
 }
 
-extension JSValue {
+public extension JSValue {
     var isFunction: Bool {
         guard let context = context?.context else { return false }
         return JS_IsFunction(context, cValue) != 0
@@ -108,6 +178,22 @@ extension JSValue {
         guard self.context != nil else { return nil }
         return self.getValue()
     }
+    
+    var object: JSObjectValue? {
+        guard self.context != nil else { return nil }
+        return JS_IsObject(cValue) == 1 ? JSObjectValue(context, value: cValue, autoFree: self.autoFree) : nil;
+    }
+    
+    var array: JSArrayValue? {
+        guard self.context != nil else { return nil }
+        return JS_IsArray(self.context!.context, cValue) == 1 ? JSArrayValue(context, value: cValue, autoFree: self.autoFree) : nil;
+    }
+    
+    var bool: Bool? {
+        guard self.context != nil else { return nil }
+        return self.getValue()
+    }
+    
     
     var error: JSError? {
         guard self.context != nil else { return nil }
@@ -242,6 +328,21 @@ extension Double: ConvertibleWithJavascript {
     
     public func jsValue(_ context: JSContextWrapper) -> JSValue {
         let value = JS_NewFloat64(context.context, self)
+        return JSValue(context, value: value)
+    }
+}
+
+extension Bool: ConvertibleWithJavascript {
+    public init?(_ context: JSContextWrapper, value: JSCValue) {
+        if JS_IsBool(value) == 0 {
+            return nil
+        }
+        
+        self = JS_ToBool(context.context, value) == 1
+    }
+    
+    public func jsValue(_ context: JSContextWrapper) -> JSValue {
+        let value = JS_NewBool(context.context, self ? 1 : 0)
         return JSValue(context, value: value)
     }
 }
