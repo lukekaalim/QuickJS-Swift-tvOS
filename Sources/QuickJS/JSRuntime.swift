@@ -38,11 +38,14 @@ public class JSRuntime {
         return ctx
     }
     
-    public init?() {
+    public init?(maxStackSize: Int? = nil) {
         guard let runtime = JS_NewRuntime() else {
             return nil
         }
         self.jsInstance = runtime
+        if (maxStackSize != nil) {
+            JS_SetMaxStackSize(runtime, maxStackSize!);
+        }
         //js_std_set_worker_new_context_func(JSRuntime.contextBuilder);
         //js_std_init_handlers(runtime);
         //JS_SetModuleLoaderFunc(runtime, nil, js_module_loader, nil);
